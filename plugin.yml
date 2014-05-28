@@ -1,6 +1,6 @@
 name: TestGenerator
 main: de.greenysv.test.wg.TestGenerator
 version: 1.0.0
-author: Sven
-description: Svens Test WorldGen
+author: TheGreeny
+description: TheGreenys Test WorldGen
 load: startup
