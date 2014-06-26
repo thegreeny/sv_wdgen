@@ -1,8 +1,14 @@
 package de.greenysv.test.wg;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,9 +23,16 @@ public class TestChunk extends ChunkGenerator {
 	//private final int MAX_GEN_HEIGHT = 255;
 	
 	ArrayList<BlockPopulator> AllePopulatoren = new ArrayList<BlockPopulator>();
+	BufferedImage img;
 	
 	public TestChunk() {
 		AllePopulatoren.add(new PopPenis());
+		
+		try {
+			img = ImageIO.read(new File("map.png"));
+		} catch (IOException e) {
+			System.out.println("Kann das bild nicht einlesen: map.png");
+		}
 	}
 	
 	
@@ -41,10 +54,24 @@ public class TestChunk extends ChunkGenerator {
 			for(inZ = 0; inZ < 16; inZ++) {
 				
 				// Sinuswelle errechnen
-				inY = (int)(Math.sin((x*16 + inX) / Math.PI / 10) * 25 + 25) + (int)(Math.cos((z*16 + inZ) / Math.PI / 10) * 25 + 25);
+				//inY = (int)(Math.sin((x*16 + inX) / Math.PI / 10) * 25 + 25) + (int)(Math.cos((z*16 + inZ) / Math.PI / 10) * 25 + 25);
 				
-				// und abspeichern
-				result[inY >> 4][((inY & 0xF) << 8) | (inZ << 4) | inX] = (short)Material.GRASS.getId();
+				int curX = (x*16 + inX);
+				int curZ = (z*16 + inZ);
+				
+				result[inY >> 4][((inY & 0xF) << 8) | (inZ << 4) | inX] = (short)Material.AIR.getId();
+				
+				if(curX > 0 && curZ > 0) {
+					if(curX < img.getWidth() && curZ < img.getHeight()) {
+						
+						Color c = new Color(img.getRGB(curX, curZ)); 
+						inY = c.getRed();
+						
+						// und abspeichern
+						for(int cy = 0; cy <= inY; cy++)
+							result[cy >> 4][((cy & 0xF) << 8) | (inZ << 4) | inX] = (short)Material.GRASS.getId();
+					}
+				}
 			}
 		
         return result;
