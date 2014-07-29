@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Biome;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 
@@ -29,7 +30,9 @@ public class TestChunk extends ChunkGenerator {
 		AllePopulatoren.add(new PopPenis());
 		
 		try {
+			
 			img = ImageIO.read(new File("map.png"));
+			
 		} catch (IOException e) {
 			System.out.println("Kann das bild nicht einlesen: map.png");
 		}
@@ -41,6 +44,9 @@ public class TestChunk extends ChunkGenerator {
 		
 		int maxHeight = world.getMaxHeight();
         
+		// Biom ist immer PLAINS
+		biomes.setBiome(x, z, Biome.PLAINS);
+		
 		// Alle Biome auf PLAINS setzen
 		//biomes.setBiome(x, z, Biome.PLAINS);
 		
@@ -64,12 +70,32 @@ public class TestChunk extends ChunkGenerator {
 				if(curX > 0 && curZ > 0) {
 					if(curX < img.getWidth() && curZ < img.getHeight()) {
 						
-						Color c = new Color(img.getRGB(curX, curZ)); 
+						Color c = new Color(img.getRGB(curX, curZ));
+						
+						// Rot --> Höhe in Y ------------------------------------------------------
 						inY = c.getRed();
 						
 						// und abspeichern
 						for(int cy = 0; cy <= inY; cy++)
 							result[cy >> 4][((cy & 0xF) << 8) | (inZ << 4) | inX] = (short)Material.GRASS.getId();
+						
+						// -------------------------------------------------------------------------
+						
+						// Blau --> See
+						if(c.getBlue() == 255)
+							result[inY >> 4][((inY & 0xF) << 8) | (inZ << 4) | inX] = (short) Material.WATER.getId();
+
+						// Blau 200 --> Strasse
+						if(c.getBlue() == 200)
+							result[inY >> 4][((inY & 0xF) << 8) | (inZ << 4) | inX] = (short) Material.WOOL.getId();
+
+						
+						// Grün --> Haus
+						if(c.getGreen() == 255)
+							for(int cy = inY+1; cy <= inY+5; cy++)
+								result[cy >> 4][((cy & 0xF) << 8) | (inZ << 4) | inX] = (short)Material.STONE.getId();
+						
+						
 					}
 				}
 			}
